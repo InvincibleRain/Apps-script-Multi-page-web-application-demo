@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <title>Single Page App</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Josefin Slab|Playfair Display SC|Crimson+Text"
+    />
+
+    <style>
+      h1 {
+        text-align: center;
+        margin: 2px;
+        text-transform: capitalize;
+        background-color: DodgerBlue;
+        border-style: none none none solid;
+        border-color: red;
+        border-radius: 0px 4px 4px 0px;
+        font-weight: Bold;
+        font-family: 'Playfair Display SC', sans-serif, serif;
+        font-size: 1.4em;
+        padding: 8px;
+      }
+      span:hover,
+      a:hover {
+        background-color: Orange;
+        text-shadow: -2px -2px 2px Tomato;
+      }
+      body {
+        background-color: MediumSeaGreen;
+        color: white;
+        font-size: 1.5em;
+        border-style: none;
+        margin: 0px;
+        padding: 0px;
+        font-family: 'Josefin Slab', sans-serif;
+      }
+      a {
+        color: white;
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: inherit;
+        padding: 0.5em;
+        justify-content: center;
+        pointer-events:none;
+      }
+      #flexc {
+        display: flex;
+        background-color: DodgerBlue;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        border: none;
+        position: fixed;
+        bottom: 0px;
+        right: 0px;
+        left: 0px;
+      }
+      #load {
+        position: fixed;
+        margin-bottom: 20px;
+        right: 50%;
+        left: 50%;
+      }
+      #main > div {
+        min-height: 400px;
+        text-align: center;
+        overflow: hidden;
+        margin-bottom: 100px;
+      }
+      li {
+        text-align: left;
+      }
+      span,
+      #page {
+        position: relative;
+      }
+    </style>
+    <script>
+      gs = google.script
+      //Change base url
+      gs.run
+        .withSuccessHandler(url => {
+          $('base').attr('href', url);
+          $('a').css('pointer-events','auto')
+        })
+        .getUrl()
+
+      //Function to handle hash change
+      function change(e) {
+        let hash = e.location.hash
+        console.info(hash)
+        if (!hash || hash === 'index' || hash === 'load') {
+          $('#page').slideUp()
+          $('#main').slideDown('slow')
+          return
+        }
+        $('#load').show()
+        $('#main').slideUp('slow')
+        gs.run
+          .withSuccessHandler(htmlFragment => {
+            console.info(htmlFragment)
+            $('#page').slideUp('slow', function() {
+              $(this).html(htmlFragment)
+              $(this).slideDown('slow')
+            })
+
+            $('#load').hide()
+          })
+          .getHtml(hash)
+      }
+      gs.history.setChangeHandler(change)
+
+      try {
+        myStorage = window.sessionStorage
+      } catch (e) {
+        console.log(JSON.stringify(e))
+        myStorage = {real:false}
+        myStorage.getItem = function(key) {
+          return this[key]
+        }
+        myStorage.setItem = function(key, value) {
+          this[key] = value
+          return true
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1><span id="type">Single</span> Page App Demo</h1>
+    <div id="main">
+      <div>
+        This is a simple demonstration of the Web App capabilities of Google
+        Apps Script.
+        <ul>
+          <li>
+            Page 1 is a HTML fragment in a separate file. Click bottom left to
+            navigate to Page 1
+          </li>
+          <li>
+            Page 2 is a HTML fragment in a separate file. Click bottom right to
+            navigate to Page 2
+          </li>
+          <li>
+            It's much easier to create Single Page Application than a multi page
+            application in Google Apps Script. Click "SINGLE" in the title to
+            switch and view how multi-page application works
+          </li>
+          <li>
+            Notice the explicit absence of any css in the new page when the page
+            is opened in "MULTI" page mode
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div id="page"></div>
+    <div id="load">
+      <img
+        src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///+vxE/n6xu/0UOvxE/L2bfT3i/X4miH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA=="
+      />
+    </div>
+    <div id="flexc">
+      <a href="#page1">Page1</a>
+      <a href="#index">🏠</a>
+      <a href="#page2">Page2</a>
+    </div>
+
+    <script>
+
+      //Framed somewhere else; Sandboxed frame cannot navigate intermediate frames
+      //Using postMessage to communicate outside 
+      if(window.top !== window.parent.parent){
+        $('a').each((_,el)=>{
+          el.addEventListener('click',e=>{
+            e.preventDefault();
+            //TODO Secure *
+            window.parent.parent.parent.postMessage(e.target.href,"*")
+          })
+        })
+      }
+      //Toggle single page(false/default state)/ multi page (true state)
+      function toggleApp(main) {
+        let type = myStorage.getItem('type') === 'true'
+        type = main ? !type : type //interchange type if loading from main
+        if (main && type) return //If load from main and single page
+        console.log({ type: type })
+        console.log('B4' + $('#type').text())
+        let text = type ? 'Single' : 'Multi'
+        $('#type')
+          .animate({ left: '+=250px', opacity: 0.1 }, 'slow', function() {
+            $(this).text(text)
+          })
+          .animate({ left: '-=250px', opacity: 1 })
+
+        console.log('Atr' + $('#type').text())
+        $('a').each((i, el) => {
+          $(el).attr('href', function(i, currVal) {
+            console.log(currVal)
+            return currVal.indexOf('#') + 1
+              ? '?page=' + currVal.slice(1)
+              : currVal.indexOf('?') + 1
+              ? '#' + currVal.slice(6)
+              : currVal
+          })
+        })
+        console.log('changed')
+        myStorage.setItem('type', !type)
+      }
+      //Adds Main html
+      //Adds toggle to change to Multiple page app
+      $(() => {
+        gs.history.replace({}, null, 'index')
+        $('#load,#page').hide()
+        toggleApp(true)
+        $('a').on('click', function() {
+          console.log('a clicked')
+          if (myStorage.getItem('type') === 'true')
+            gs.history.replace({}, null, 'load')
+        })
+        $('#type').on('click', () => {
+          toggleApp()
+        })
+        $('ul li:eq(2)').click(() => {
+          alert("Enable Third party cookies, If this doesn't work")
+        })
+        //unload handler to prevent load from cache
+        $(window).on('beforeunload', function(e) {
+          console.log('unloading..')
+          $('#load,#imgid').hide()
+          /*e.preventDefault()
+          e.returnValue = false
+          return false*/
+        })
+      })
+    </script>
+  </body>
+</html>

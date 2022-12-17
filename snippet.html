@@ -1,0 +1,36 @@
+<!-- This is a sample snippet html, if the published webapp is iframed.  -->
+<style type="text/css">
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0px;
+  }
+  html,
+  body {
+    margin: 0px;
+    padding: 0px;
+    border: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+<iframe src="https://script.google.com/macros/s/[SCRIPT_PUBLISHED_URL]/exec"
+  >Loading...</iframe
+>
+<script type="text/javascript">
+  const handleMessage = function (event) {
+    if (event.origin !== 'https://[SCRIPT_ORIGIN].googleusercontent.com') {
+      alert('Origin Disallowed');
+      return;
+    }
+    if (
+      /^https\:\/\/script.google.com\/macros\/s\/AKfycbxrSsarYV7BUnQIuzaj6Y7AZuW4tWzn7EomPkPI375Vtlm_Y1ae\/exec(.){5,10}$/.test(
+        event.data
+      )
+    ) {
+      document.querySelector('iframe').src = event.data;
+    }
+  };
+  window.addEventListener('message', handleMessage);
+</script>
